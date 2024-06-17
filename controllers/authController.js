@@ -39,13 +39,14 @@ const authenticate = async ({ token, ...credentials }) => {
 			if (!userData) {
 				const ownerData = await User.findOne({ userName: credentials.userName })
 				if (!ownerData) {
-					throw new Error('User not found')
+					throw new Error('USER_NOT_FOUND')
 				} else if (ownerData.guests.some(({ password }) => password === credentials.password)) {
 					userData = ownerData.guests.find(({ password }) => password === credentials.password)
 					userData._id = ownerData._id
 					userRole = 'guest'
+					if (userData.active === false) throw new Error('GUEST_IS_INACTIVE')
 				} else {
-					throw new Error('Password is incorrect')
+					throw new Error('PASSWORD_IS_INCORRECT')
 				}
 			}
 
@@ -65,7 +66,7 @@ const authenticate = async ({ token, ...credentials }) => {
 
 		const { active, _id, ...userData } = user
 		if (active === false) {
-			throw new Error('User is inactive')
+			throw new Error('USER_IS_INACTIVE')
 		}
 
 		if (!token) {
@@ -84,81 +85,3 @@ const authenticate = async ({ token, ...credentials }) => {
 }
 
 module.exports = { authenticate, decryptToken }
-
-const defaultConfiguration = {
-	"lightSettings": {
-		"areas": [
-			{
-				"name": "dungeon"
-			},
-			{
-				"name": "bestiary"
-			},
-			{
-				"name": "laboratory"
-			}
-		],
-		"moodPresets": [
-			{
-				"name": "suicidal"
-			},
-			{
-				"name": "horny"
-			},
-			{
-				"name": "outraged"
-			},
-			{
-				"name": "mysterious"
-			}
-		],
-		"dynamicPresets": [
-			{
-				"name": "accelerated"
-			},
-			{
-				"name": "stoned"
-			},
-			{
-				"name": "full throttle"
-			}
-		],
-		"allMode": false,
-		"allSettings": {
-			"name": "all"
-		}
-	},
-	"instalationSettings": {
-		"instalations": [
-			{
-				"name": "dark altar"
-			},
-			{
-				"name": "mushroom garden"
-			}
-		],
-		"soundDesignPresets": [
-			{
-				"name": "pink floyd"
-			},
-			{
-				"name": "colour haze"
-			}
-		],
-		"scenePresets": [
-			{
-				"name": "sacrifice"
-			},
-			{
-				"name": "betrayal"
-			},
-			{
-				"name": "seduction"
-			}
-		],
-		"allMode": false,
-		"allSettings": {
-			"name": "all"
-		}
-	}
-}
