@@ -1,8 +1,16 @@
 const Configuration = require('../models/Configuration')
 
+const createConfiguration = async params => {
+	try {
+		const newConfiguration = new Configuration(params)
+		return await newConfiguration.save()
+	} catch ({ message }) {
+		return { message }
+	}
+}
+
 const updateConfiguration = async (configurationId, newConfiguration) => {
 		try {
-				let result = {}
 				const configuration = await Configuration.findById(configurationId)
 				if (!configuration) throw new Error('Configuration not found')
 				const { active, lightSettings, instalationSettings } = newConfiguration
@@ -50,4 +58,4 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 		}
 }
 
-module.exports = { updateConfiguration }
+module.exports = { updateConfiguration, createConfiguration }
