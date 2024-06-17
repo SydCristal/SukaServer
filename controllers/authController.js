@@ -60,7 +60,7 @@ const authenticate = async ({ token, ...credentials }) => {
 			return result
 		}).catch(({ message }) => {
 			console.error(message)
-			throw new Error('User not found')
+			throw new Error(message)
 		})
 
 		const { active, _id, ...userData } = user

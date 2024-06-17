@@ -28,8 +28,10 @@ io.on('connection', async socket => {
   const { token, userName, password, newUser } = socket.handshake.auth
   const data = await authenticate({ userName, password, token, newUser })
   try {
+    if (data.message) throw new Error(data.message)
+
     const { userId, message, ...userData } = data
-    const roomId = (userId).toString()
+    const roomId = userId.toString()
     const configurationId = userData.configuration._id
     if (roomId) {
       socket.join(roomId)
@@ -61,6 +63,8 @@ io.on('connection', async socket => {
     })
   } catch ({ message }) {
     console.error(message)
+    socket.emit('error', { message })
+    socket.disconnect()
   }
 })
 
