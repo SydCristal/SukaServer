@@ -50,12 +50,13 @@ const authenticate = async ({ token, ...credentials }) => {
 				}
 			}
 
-			const { _id, active } = userData
+			const { _id, active, password } = userData
 			let configuration = await Configuration.findOne({ ownerId: _id })
 
 			const result = { configuration, active, _id, ownerId: _id }
 			if (userRole === 'owner') {
 				result.guests = userData.guests
+				result.password = password
 			}
 
 			return result
