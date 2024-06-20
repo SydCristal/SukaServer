@@ -46,6 +46,10 @@ io.on('connection', async socket => {
       io.to(roomId).emit('updateGuests', updatedGuests)
     })
 
+    socket.on('displayChanges', configurationPreview => {
+      socket.to(roomId).emit('displayChanges', configurationPreview)
+    })
+
     socket.on('updateConfiguration', async configurationUpdate => {
       const configuration = await updateConfiguration(configurationId, configurationUpdate)
       io.to(roomId).emit('updateConfiguration', configuration)
