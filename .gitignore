@@ -363,3 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /secrets.txt
 /defaultConfiguration.json
+/db.js
