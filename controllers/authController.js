@@ -59,6 +59,7 @@ const authenticate = async ({ token, ...credentials }) => {
 				result.password = password
 			}
 
+			result.role = userRole
 			return result
 		}).catch(({ message }) => {
 			console.error(message)

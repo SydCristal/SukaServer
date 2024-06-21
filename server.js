@@ -6,6 +6,7 @@ const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
 const { updateConfiguration, createConfiguration } = require('./controllers/configurationController')
 const { updateGuests } = require('./controllers/userController')
+const Configuration = require('./models/Configuration')
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -25,7 +26,7 @@ const io = require('socket.io')(server, {
 //})
 
 io.on('connection', async socket => {
-  const { token, userName, password, newUser } = socket.handshake.auth
+  const { token, userName, password, newUser, isHardware = false } = socket.handshake.auth
   const data = await authenticate({ userName, password, token, newUser })
   try {
     if (data.message) throw new Error(data.message)
@@ -35,6 +36,7 @@ io.on('connection', async socket => {
     const configurationId = userData.configuration._id
     if (roomId) {
       socket.join(roomId)
+      if (isHardware) socket.join(roomId + '-hardware')
       socket.emit('connection', userData)
     } else {
       socket.emit('error', { message })
@@ -44,6 +46,10 @@ io.on('connection', async socket => {
     socket.on('updateGuests', async guests => {
       const updatedGuests = await updateGuests(userId, guests)
       io.to(roomId).emit('updateGuests', updatedGuests)
+    })
+
+    socket.on('previewConfiguration', previewConfiguration => {
+      io.to(roomId + '-hardware').emit('updateConfiguration', previewConfiguration)
     })
 
     socket.on('updateConfiguration', async configurationUpdate => {
@@ -59,6 +65,7 @@ io.on('connection', async socket => {
     socket.on('disconnect', () => {
       console.log('DISCONNECT')
       socket.leave(roomId)
+      if (isHardware) socket.leave(roomId + '-hardware')
       socket.disconnect()
     })
   } catch ({ message }) {

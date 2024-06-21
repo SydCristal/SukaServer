@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const MONGO_URI = ''
+const MONGO_URI = 'mongodb+srv://doadmin:07g4P368t5Kc2yeJ@dbaas-db-4665123-efcdf301.mongo.ondigitalocean.com/SukaDB?tls=true&authSource=admin&replicaSet=dbaas-db-4665123'
 
 mongoose.connect(MONGO_URI, {
 	useNewUrlParser: true,
