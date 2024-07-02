@@ -5,8 +5,7 @@ const http = require('http')
 const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
 const { updateConfiguration, createConfiguration } = require('./controllers/configurationController')
-const { updateGuests } = require('./controllers/userController')
-const Configuration = require('./models/Configuration')
+const { updateGuests, createUser } = require('./controllers/userController')
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -59,7 +58,12 @@ io.on('connection', async socket => {
 
     socket.on('createConfiguration', async configurationData => {
       const configuration = await createConfiguration({ ...configurationData, ownerId: userId })
-      io.to(roomId).emit('createConfiguration', configuration)
+      io.to(roomId + '-hardware').emit('createConfiguration', configuration)
+    })
+
+    socket.on('createUser', async userData => {
+      const user = await createUser(userData)
+      io.to(roomId + '-hardware').emit('createUser', user)
     })
 
     socket.on('disconnect', () => {

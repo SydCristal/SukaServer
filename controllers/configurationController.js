@@ -1,12 +1,12 @@
 const Configuration = require('../models/Configuration')
 
 const createConfiguration = async params => {
-	try {
-		const newConfiguration = new Configuration(params)
-		return await newConfiguration.save()
-	} catch ({ message }) {
-		return { message }
-	}
+		try {
+				const newConfiguration = new Configuration(params)
+				return await newConfiguration.save()
+		} catch ({ message }) {
+				return { message }
+		}
 }
 
 const updateConfiguration = async (configurationId, newConfiguration) => {
