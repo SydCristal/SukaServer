@@ -9,6 +9,16 @@ const createConfiguration = async params => {
 		}
 }
 
+const editConfiguration = async ({ _id, ...params }) => {
+		try {
+				const configuration = await Configuration.replaceOne({ _id }, { ...params })
+				if (!configuration) throw new Error('Configuration not found')
+				return configuration
+		} catch ({ message }) {
+				return { message }
+		}
+}
+
 const updateConfiguration = async (configurationId, newConfiguration) => {
 		try {
 				const configuration = await Configuration.findById(configurationId)
@@ -34,12 +44,13 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 				}
 
 				if (instalationSettings) {
-						const { instalation, allMode, allSettings } = instalationSettings
-						if (allMode !== undefined) configuration.instalationSettings.allMode = allMode
-						if (allSettings) configuration.instalationSettings.allSettings = {
-								...configuration.instalationSettings.allSettings,
-								...allSettings
-						}
+						const { instalation//, allMode, allSettings
+						} = instalationSettings
+						//if (allMode !== undefined) configuration.instalationSettings.allMode = allMode
+						//if (allSettings) configuration.instalationSettings.allSettings = {
+						//		...configuration.instalationSettings.allSettings,
+						//		...allSettings
+						//}
 						if (instalation) {
 								configuration.instalationSettings.instalations = configuration.instalationSettings.instalations.map(i => {
 										if (i._id.toString() === instalation._id) {
@@ -58,4 +69,4 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 		}
 }
 
-module.exports = { updateConfiguration, createConfiguration }
+module.exports = { updateConfiguration, createConfiguration, editConfiguration }

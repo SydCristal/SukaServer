@@ -2,19 +2,23 @@ const mongoose = require('mongoose')
 const { ObjectId } = mongoose.Schema.Types
 
 const moodSchema = new mongoose.Schema({
-	name: { type: String, required: true },
+		name: { type: String, required: true },
+		icon: { type: String }
 })
 
 const dynamicSchema = new mongoose.Schema({
-	name: { type: String, required: true },
+		name: { type: String, required: true },
+		icon: { type: String }
 })
 
 const sceneSchema = new mongoose.Schema({
-	name: { type: String, required: true },
+		name: { type: String, required: true },
+		icon: { type: String }
 })
 
 const soundDesignSchema = new mongoose.Schema({
-	name: { type: String, required: true },
+		name: { type: String, required: true },
+		icon: { type: String }
 })
 
 const areaSchema = new mongoose.Schema({
@@ -33,6 +37,8 @@ const instalationSchema = new mongoose.Schema({
 	scene: ObjectId,
 	interactive: { type: Boolean, default: true },
 	intensity: { type: Number, default: 50, min: 0, max: 100 },
+	brightness: { type: Number, default: 50, min: 0, max: 100 },
+	speed: { type: Number, default: 50, min: 0, max: 100 },
 	soundDesign: ObjectId,
 	volume: { type: Number, default: 50, min: 0, max: 100 },
 })
@@ -73,14 +79,14 @@ const instalationSettingsSchema = new mongoose.Schema({
 		type: [sceneSchema],
 		required: true
 	},
-	allMode: {
-		type: Boolean,
-		default: false
-	},
-	allSettings: {
-		type: instalationSchema,
-		default: () => ({ name: 'all' })
-	},
+	//allMode: {
+	//	type: Boolean,
+	//	default: false
+	//},
+	//allSettings: {
+	//	type: instalationSchema,
+	//	default: () => ({ name: 'all' })
+	//},
 })
 
 const configurationSchema = new mongoose.Schema({

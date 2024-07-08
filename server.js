@@ -4,7 +4,7 @@ const cors = require('cors')
 const http = require('http')
 const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
-const { updateConfiguration, createConfiguration } = require('./controllers/configurationController')
+const { updateConfiguration, createConfiguration, editConfiguration } = require('./controllers/configurationController')
 const { updateGuests, createUser } = require('./controllers/userController')
 
 app.use(express.json()) // for parsing application/json
@@ -54,6 +54,11 @@ io.on('connection', async socket => {
     socket.on('updateConfiguration', async configurationUpdate => {
       const configuration = await updateConfiguration(configurationId, configurationUpdate)
       io.to(roomId).emit('updateConfiguration', configuration)
+    })
+
+    socket.on('editConfiguration', async configurationData => {
+      const configuration = await editConfiguration(configurationData)
+      io.to(roomId).emit('editConfiguration', configuration)
     })
 
     socket.on('createConfiguration', async configurationData => {
