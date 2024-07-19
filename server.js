@@ -6,6 +6,7 @@ const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
 const { updateConfiguration, createConfiguration, editConfiguration } = require('./controllers/configurationController')
 const { updateGuests, createUser } = require('./controllers/userController')
+const Configuration = require('./models/Configuration')
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -29,10 +30,9 @@ io.on('connection', async socket => {
   const data = await authenticate({ userName, password, token, newUser })
   try {
     if (data.message) throw new Error(data.message)
-
     const { userId, message, ...userData } = data
     const roomId = userId.toString()
-    const configurationId = userData.configuration._id
+    const configurationId = userData.configuration?._id
     if (roomId) {
       socket.join(roomId)
       if (isHardware) socket.join(roomId + '-hardware')
@@ -45,6 +45,11 @@ io.on('connection', async socket => {
     socket.on('updateGuests', async guests => {
       const updatedGuests = await updateGuests(userId, guests)
       io.to(roomId).emit('updateGuests', updatedGuests)
+    })
+
+    socket.on('requestConfiguration', async ({ ownerId }) => {
+      const configuration = await Configuration.findOne({ ownerId })
+      socket.emit('requestConfiguration', configuration)
     })
 
     socket.on('previewConfiguration', previewConfiguration => {
@@ -68,7 +73,7 @@ io.on('connection', async socket => {
 
     socket.on('createUser', async userData => {
       const user = await createUser(userData)
-      io.to(roomId + '-hardware').emit('createUser', user)
+      io.to(roomId).emit('createUser', user)
     })
 
     socket.on('disconnect', () => {
