@@ -1,17 +1,57 @@
 const Configuration = require('../models/Configuration')
 
+const setPreselectedPresets = configuration => {
+		const { lightSettings, instalationSettings } = configuration
+		if (lightSettings?.enabled && lightSettings?.dynamicPresets?.length && lightSettings?.moodPresets?.length) {
+				if (!lightSettings.allSettings.dynamic) lightSettings.allSettings.dynamic = lightSettings.dynamicPresets[0]._id
+				if (!lightSettings.allSettings.mood) lightSettings.allSettings.mood = lightSettings.moodPresets[0]._id
+
+				lightSettings.areas.forEach(area => {
+						if (!area.dynamic) area.dynamic = lightSettings.dynamicPresets[0]._id
+						if (!area.mood) area.mood = lightSettings.moodPresets[0]._id
+				})
+		}
+
+		if (instalationSettings?.enabled && instalationSettings?.scenePresets?.length && instalationSettings?.soundDesignPresets?.length) {
+				instalationSettings.instalations.forEach(instalation => {
+						if (!instalation.scene) instalation.scene = instalationSettings.scenePresets[0]._id
+						if (!instalation.soundDesign) instalation.soundDesign = instalationSettings.soundDesignPresets[0]._id
+				})
+		}
+
+		return { ...configuration, lightSettings, instalationSettings }
+}
+
 const createConfiguration = async params => {
 		try {
 				const newConfiguration = new Configuration(params)
-				return await newConfiguration.save()
+				const configuration = await newConfiguration.save().then(c => {
+						return setPreselectedPresets(c._doc)
+				})
+
+				const result = await Configuration.findOneAndReplace({ _id: configuration._id }, configuration)
+
+				return result
+		} catch ({ message }) {
+				console.log(message);
+				return { message }
+		}
+}
+
+const editConfiguration = async configurationData => {
+		try {
+				const { _id, ...params } = setPreselectedPresets(configurationData)
+				let configuration = await Configuration.findOneAndReplace({ _id }, { ...params })
+				if (!configuration) throw new Error('Configuration not found')
+				return configuration
 		} catch ({ message }) {
 				return { message }
 		}
 }
 
-const editConfiguration = async ({ _id, ...params }) => {
+const deleteConfiguration = async ownerId => {
 		try {
-				const configuration = await Configuration.replaceOne({ _id }, { ...params })
+				const configuration = await Configuration.findOneAndDelete({ ownerId })
 				if (!configuration) throw new Error('Configuration not found')
 				return configuration
 		} catch ({ message }) {
@@ -69,4 +109,4 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 		}
 }
 
-module.exports = { updateConfiguration, createConfiguration, editConfiguration }
+module.exports = { updateConfiguration, createConfiguration, editConfiguration, deleteConfiguration }

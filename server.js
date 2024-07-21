@@ -4,8 +4,8 @@ const cors = require('cors')
 const http = require('http')
 const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
-const { updateConfiguration, createConfiguration, editConfiguration } = require('./controllers/configurationController')
-const { updateGuests, createUser } = require('./controllers/userController')
+const { updateConfiguration, createConfiguration, editConfiguration, deleteConfiguration } = require('./controllers/configurationController')
+const { updateGuests, createUser, editUser, deleteUser, toggleUser } = require('./controllers/userController')
 const Configuration = require('./models/Configuration')
 
 app.use(express.json()) // for parsing application/json
@@ -71,9 +71,30 @@ io.on('connection', async socket => {
       io.to(roomId + '-hardware').emit('createConfiguration', configuration)
     })
 
-    socket.on('createUser', async userData => {
+    socket.on('editUser', async ({ configuration: configurationData, ...userData }) => {
+      const user = await editUser(userData)
+      const configuration = await editConfiguration(configurationData)
+      socket.emit('editUser', user)
+      io.to(userData._id.toString()).emit('updateConfiguration', configuration._doc)
+    })
+
+    socket.on('toggleUser', async ({ _id, active }) => {
+      const user = await toggleUser({ _id, active })
+      socket.emit('toggleUser', { _id, active })
+      if (!active) io.socketsLeave(_id)
+    })
+
+    socket.on('deleteUser', async userId => {
+      const { _id } = await deleteUser(userId)
+      await deleteConfiguration(userId)
+      io.socketsLeave(_id)
+      socket.emit('deleteUser', userId)
+    })
+
+    socket.on('createUser', async ({ configuration, ...userData }) => {
       const user = await createUser(userData)
-      io.to(roomId).emit('createUser', user)
+      await createConfiguration({ ...configuration, ownerId: user._id })
+      socket.emit('createUser', user)
     })
 
     socket.on('disconnect', () => {
