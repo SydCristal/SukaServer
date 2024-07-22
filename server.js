@@ -5,7 +5,7 @@ const http = require('http')
 const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
 const { updateConfiguration, createConfiguration, editConfiguration, deleteConfiguration } = require('./controllers/configurationController')
-const { updateGuests, createUser, editUser, deleteUser, toggleUser } = require('./controllers/userController')
+const { updateGuests, toggleGuest, createUser, editUser, deleteUser, toggleUser } = require('./controllers/userController')
 const Configuration = require('./models/Configuration')
 
 app.use(express.json()) // for parsing application/json
@@ -79,9 +79,14 @@ io.on('connection', async socket => {
     })
 
     socket.on('toggleUser', async ({ _id, active }) => {
-      const user = await toggleUser({ _id, active })
+      await toggleUser({ _id, active })
       socket.emit('toggleUser', { _id, active })
       if (!active) io.socketsLeave(_id)
+    })
+
+    socket.on('toggleGuest', async ({ _id, active }) => {
+      await toggleGuest({ userId, _id, active })
+      socket.emit('toggleGuest', { _id, active })
     })
 
     socket.on('deleteUser', async userId => {
