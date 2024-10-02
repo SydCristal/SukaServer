@@ -66,12 +66,13 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 				const { active, lightSettings, instalationSettings } = newConfiguration
 				if (active !== undefined) configuration.active = active
 				if (lightSettings) {
-						const { area, allMode, allSettings } = lightSettings
+						const { area, allMode, allSettings, timer } = lightSettings
 						if (allMode !== undefined) configuration.lightSettings.allMode = allMode
 						if (allSettings) configuration.lightSettings.allSettings = {
 								...configuration.lightSettings.allSettings,
 								...allSettings
 						}
+						if (timer) configuration.lightSettings.timer = timer
 						if (area) {
 								configuration.lightSettings.areas = configuration.lightSettings.areas.map(a => {
 										if (a._id.toString() === area._id) {
@@ -84,13 +85,14 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 				}
 
 				if (instalationSettings) {
-						const { instalation//, allMode, allSettings
+						const { instalation, timer//, allMode, allSettings
 						} = instalationSettings
 						//if (allMode !== undefined) configuration.instalationSettings.allMode = allMode
 						//if (allSettings) configuration.instalationSettings.allSettings = {
 						//		...configuration.instalationSettings.allSettings,
 						//		...allSettings
 						//}
+						if (timer) configuration.instalationSettings.timer = timer
 						if (instalation) {
 								configuration.instalationSettings.instalations = configuration.instalationSettings.instalations.map(i => {
 										if (i._id.toString() === instalation._id) {
