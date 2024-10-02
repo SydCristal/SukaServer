@@ -4,8 +4,9 @@ const cors = require('cors')
 const http = require('http')
 const PORT = process.env.PORT || 8080
 const { authenticate } = require('./controllers/authController')
-const { updateConfiguration, createConfiguration, editConfiguration } = require('./controllers/configurationController')
-const { updateGuests, createUser } = require('./controllers/userController')
+const { updateConfiguration, createConfiguration, editConfiguration, deleteConfiguration } = require('./controllers/configurationController')
+const { updateGuests, toggleGuest, createUser, editUser, deleteUser, toggleUser } = require('./controllers/userController')
+const Configuration = require('./models/Configuration')
 
 app.use(express.json()) // for parsing application/json
 app.use(express.urlencoded({ extended: true })) // for parsing application/x-www-form-urlencoded
@@ -29,10 +30,9 @@ io.on('connection', async socket => {
   const data = await authenticate({ userName, password, token, newUser })
   try {
     if (data.message) throw new Error(data.message)
-
     const { userId, message, ...userData } = data
     const roomId = userId.toString()
-    const configurationId = userData.configuration._id
+    const configurationId = userData.configuration?._id
     if (roomId) {
       socket.join(roomId)
       if (isHardware) socket.join(roomId + '-hardware')
@@ -45,6 +45,11 @@ io.on('connection', async socket => {
     socket.on('updateGuests', async guests => {
       const updatedGuests = await updateGuests(userId, guests)
       io.to(roomId).emit('updateGuests', updatedGuests)
+    })
+
+    socket.on('requestConfiguration', async ({ ownerId }) => {
+      const configuration = await Configuration.findOne({ ownerId })
+      socket.emit('requestConfiguration', configuration)
     })
 
     socket.on('previewConfiguration', previewConfiguration => {
@@ -66,9 +71,35 @@ io.on('connection', async socket => {
       io.to(roomId + '-hardware').emit('createConfiguration', configuration)
     })
 
-    socket.on('createUser', async userData => {
+    socket.on('editUser', async ({ configuration: configurationData, ...userData }) => {
+      const user = await editUser(userData)
+      const configuration = await editConfiguration(configurationData)
+      socket.emit('editUser', user)
+      io.to(userData._id.toString()).emit('updateConfiguration', configuration._doc)
+    })
+
+    socket.on('toggleUser', async ({ _id, active }) => {
+      await toggleUser({ _id, active })
+      socket.emit('toggleUser', { _id, active })
+      if (!active) io.socketsLeave(_id)
+    })
+
+    socket.on('toggleGuest', async ({ _id, active }) => {
+      await toggleGuest({ userId, _id, active })
+      socket.emit('toggleGuest', { _id, active })
+    })
+
+    socket.on('deleteUser', async userId => {
+      const { _id } = await deleteUser(userId)
+      await deleteConfiguration(userId)
+      io.socketsLeave(_id)
+      socket.emit('deleteUser', userId)
+    })
+
+    socket.on('createUser', async ({ configuration, ...userData }) => {
       const user = await createUser(userData)
-      io.to(roomId + '-hardware').emit('createUser', user)
+      await createConfiguration({ ...configuration, ownerId: user._id })
+      socket.emit('createUser', user)
     })
 
     socket.on('disconnect', () => {

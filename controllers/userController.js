@@ -9,6 +9,49 @@ const createUser = async params => {
 		}
 }
 
+const editUser = async ({ _id, ...params }) => {
+		try {
+				const user = await User.replaceOne({ _id }, { ...params })
+				if (!user) throw new Error('User not found')
+				return user
+		} catch ({ message }) {
+				return { message }
+		}
+}
+
+const deleteUser = async userId => {
+		try {
+				const user = await User.findByIdAndDelete(userId)
+				if (!user) throw new Error('User not found')
+				return user
+		} catch ({ message }) {
+				return { message }
+		}
+}
+
+const toggleUser = async ({ _id, active }) => {
+		try {
+				const user = await User.findByIdAndUpdate(_id, { active })
+				if (!user) throw new Error('User not found')
+				return user
+		} catch ({ message }) {
+				return { message }
+		}
+}
+
+const toggleGuest = async ({ userId, _id, active }) => {
+		try {
+				const user = await User.findById(userId)
+				if (!user) throw new Error('User not found')
+				user.guests = user.guests.map(guest => guest._id.toString() === _id ? { ...guest, active } : guest)
+				const updatedUser = await user.save()
+				return updatedUser.guests
+		} catch ({ message }) {
+				console.log(message)
+				return { message }
+		}
+}
+
 const updateGuests = async (userId, guests) => {
 		try {
 				const user = await User.findById(userId)
@@ -21,4 +64,4 @@ const updateGuests = async (userId, guests) => {
 		}
 }
 
-module.exports = { updateGuests, createUser }
+module.exports = { updateGuests, createUser, editUser, deleteUser, toggleUser, toggleGuest }

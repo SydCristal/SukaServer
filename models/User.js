@@ -37,7 +37,11 @@ const userSchema = new mongoose.Schema({
   guests: {
 				type: [guestSchema],
 				default: []
-		}
+  },
+  isAdmin: {
+    type: Boolean,
+    default: false
+  }
 })
 
 module.exports = mongoose.model('User', userSchema)
