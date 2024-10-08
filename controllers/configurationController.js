@@ -66,26 +66,23 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 				const { active, lightSettings, instalationSettings } = newConfiguration
 				if (active !== undefined) configuration.active = active
 				if (lightSettings) {
-						const { area, allMode, allSettings, timer } = lightSettings
+						const { areas, allMode, allSettings, timer } = lightSettings
 						if (allMode !== undefined) configuration.lightSettings.allMode = allMode
 						if (allSettings) configuration.lightSettings.allSettings = {
 								...configuration.lightSettings.allSettings,
 								...allSettings
 						}
 						if (timer) configuration.lightSettings.timer = timer
-						if (area) {
+						if (areas) {
 								configuration.lightSettings.areas = configuration.lightSettings.areas.map(a => {
-										if (a._id.toString() === area._id) {
-												a = { ...a, ...area }
-										}
-
-										return a
+										const area = areas.find(area => area._id.toString() === a._id.toString()) || {}
+										return { ...a, ...area }
 								})
 						}
 				}
 
 				if (instalationSettings) {
-						const { instalation, timer//, allMode, allSettings
+						const { instalations, timer//, allMode, allSettings
 						} = instalationSettings
 						//if (allMode !== undefined) configuration.instalationSettings.allMode = allMode
 						//if (allSettings) configuration.instalationSettings.allSettings = {
@@ -93,13 +90,10 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 						//		...allSettings
 						//}
 						if (timer) configuration.instalationSettings.timer = timer
-						if (instalation) {
+						if (instalations) {
 								configuration.instalationSettings.instalations = configuration.instalationSettings.instalations.map(i => {
-										if (i._id.toString() === instalation._id) {
-												i = { ...i, ...instalation }
-										}
-
-										return i
+										const instalation = instalations.find(instalation => instalation._id.toString() === i._id.toString()) || {}
+										return { ...i, ...instalation }
 								})
 						}
 				}
