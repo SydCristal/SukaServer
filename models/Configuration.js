@@ -36,7 +36,10 @@ const areaSchema = new mongoose.Schema({
 		dynamic: ObjectId,
 		audioReactive: { type: Boolean, default: true },
 		speed: { type: Number, default: 50, min: 0, max: 100 },
-		timer: timerSchema
+		timer: {
+				type: timerSchema,
+				default: () => ({ active: false })
+		}
 })
 
 const instalationSchema = new mongoose.Schema({
@@ -49,7 +52,10 @@ const instalationSchema = new mongoose.Schema({
 		speed: { type: Number, default: 50, min: 0, max: 100 },
 		soundDesign: ObjectId,
 		volume: { type: Number, default: 50, min: 0, max: 100 },
-		timer: timerSchema
+		timer: {
+				type: timerSchema,
+				default: () => ({ active: false })
+		}
 })
 
 const lightSettingsSchema = new mongoose.Schema({
@@ -77,7 +83,10 @@ const lightSettingsSchema = new mongoose.Schema({
 				type: Boolean,
 				default: true
 		},
-		timer: timerSchema
+		timer: {
+				type: timerSchema,
+				default: () => ({ active: false })
+		}
 })
 
 const instalationSettingsSchema = new mongoose.Schema({
@@ -97,7 +106,10 @@ const instalationSettingsSchema = new mongoose.Schema({
 				type: Boolean,
 				default: true
 		},
-		timer: timerSchema
+		timer: {
+				type: timerSchema,
+				default: () => ({ active: false })
+		}
 		//allMode: {
 		//	type: Boolean,
 		//	default: false
