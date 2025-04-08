@@ -63,8 +63,9 @@ const updateConfiguration = async (configurationId, newConfiguration) => {
 		try {
 				const configuration = await Configuration.findById(configurationId)
 				if (!configuration) throw new Error('Configuration not found')
-				const { active, lightSettings, instalationSettings } = newConfiguration
+				const { active, lightSettings, instalationSettings, preview } = newConfiguration
 				if (active !== undefined) configuration.active = active
+				if (preview) configuration.preview = { ...preview }
 				if (lightSettings) {
 						const { areas, allMode, allSettings, timer } = lightSettings
 						if (allMode !== undefined) configuration.lightSettings.allMode = allMode

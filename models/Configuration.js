@@ -120,9 +120,16 @@ const instalationSettingsSchema = new mongoose.Schema({
 		//},
 })
 
+const previewSchema = new mongoose.Schema({
+		active: { type: Boolean, default: false },
+		duration: { type: Number, default: 60 },
+		enabled: { type: Boolean, default: true }
+})
+
 const configurationSchema = new mongoose.Schema({
 		active: { type: Boolean, default: true },
 		ownerId: { type: ObjectId, required: true },
+		preview: previewSchema,
 		lightSettings: lightSettingsSchema,
 		instalationSettings: instalationSettingsSchema
 })
